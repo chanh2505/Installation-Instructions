@@ -1,0 +1,24 @@
+---
+- name: Build image and push registry
+  hosts: local  
+  tasks:
+  - name: login registry
+    command: docker login registry.unit.vn
+  
+  - name: run docker-compose build
+    command: docker-compose build
+    args:
+        chdir: /var/lib/jenkins/workspace
+  
+  - name: run docker-compose push
+    command: docker-compose push
+    args:
+        chdir: /var/lib/jenkins/workspace
+        
+---
+- name: deploy to k8s
+  hosts: web_server
+  tasks:
+   - name: re-deploy k8s
+    #command: kubectl -n ach rollout restart deployment $( kubectl -n ach get deployments | grep ach-* | awk '{print $1}')
+    command: kubectl -n ach rollout restart deployment ach-signature

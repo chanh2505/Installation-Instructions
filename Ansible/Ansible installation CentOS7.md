@@ -53,7 +53,7 @@ passwd ansadmin
 ​	Add **ansadmin** to group **sudoers**
 
 ```shell
-echo "ansadmin ALL=(ALL) NOPASSWD: ALL" ==> /etc/sudoers
+echo "ansadmin ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 ```
 
 ​	If you installed **docker** on **ansible server** and intent to run docker command. You should add user **ansadmin** to **docker** group
@@ -111,4 +111,3 @@ Final Step: Test connection to managed hosts
 ```shell
 ansible all -m ping	
 ```
-
