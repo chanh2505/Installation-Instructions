@@ -40,6 +40,28 @@ vi /etc/hosts
 10.0.0.28 worker02
 ```
 
+#### Change cgroups to systemd
+
+```shell
+sudo mkdir /etc/docker
+cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+```
+
+```shell
+sudo systemctl enable docker
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
+
 #### 	Configure repo for k8s
 
 ```shell
@@ -56,10 +78,10 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cl
 EOF
 ```
 
-#### 	Install kubelet, kubeadm & kubectl
+#### 	Install kubelet, kubeadm & kubectl ( kubectl install on only master)
 
 ```shell
-yum install -y kubelet kubeadm kubectl
+yum install -y kubelet-1.18.8 kubeadm-1.18.8 kubectl-1.18.8
 systemctl enable kubelet
 systemctl start kubelet
 ```
@@ -110,7 +132,8 @@ sudo swapoff -a
 #### Configure kubeadm with **Flannel** pod network 
 
 ```shell
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+sysctl -w net.ipv4.ip_forward=1
+sudo kubeadm init --apiserver-advertise-address=192.168.1.30 --pod-network-cidr=10.244.0.0/16
 ```
 
 Notes: We will have 2 join command in result (one for another master, one for worker), save them to use later.
@@ -142,6 +165,7 @@ sudo kubectl get nodes
 Use the command what you saved from result of **Init kubeadm step**
 
 ```shell
+sysctl -w net.ipv4.ip_forward=1
 kubeadm join --discovery-token xxxxxxxx --discovery-token-ca-cert-hash sha256:xxxxxxxxxx
 ```
 
@@ -164,8 +188,8 @@ kubectl get cs
 ​	1. Edit 2 files
 
 ```
-/etc/manifests/kube-controller-manager.yaml
-/etc/manifests/kube-scheduler.yaml
+/etc/kubernetes/manifests/kube-controller-manager.yaml
+/etc/kubernetes/manifests/kube-scheduler.yaml
 ```
 
 ​	2. Command out the line which has **--port=0**
