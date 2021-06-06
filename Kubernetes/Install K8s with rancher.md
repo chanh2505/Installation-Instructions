@@ -12,3 +12,13 @@ curl https://releases.rancher.com/install-docker/19.03.sh | sh
 sudo systemctl status docker
 ```
 
+Install rancher
+
+```
+docker run -d --restart=unless-stopped \
+  -p 80:80 -p 443:443 \
+  -v /opt/rancher:/var/lib/rancher \
+  --privileged \
+  rancher/rancher:v2.4.6
+```
+

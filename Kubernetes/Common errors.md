@@ -73,4 +73,30 @@ sudo kubectl apply -f https://docs.projectcalico.org/v3.10/manifests/calico.yaml
 
 ​	**1. Edit yaml of calico**
 
-​			Check ipaddr of master, find out the name of ipaddress you config in 
+​			Download file yaml of calico
+
+```shell
+curl https://docs.projectcalico.org/v3.10/manifests/calico.yaml --output calico.yaml
+```
+
+​			Add one  env to **calico-node** container (replace **enp0s3** by your interface ip, such as: eth0, eth1,...)
+
+```shell
+# Specify interface
+- name: IP_AUTODETECTION_METHOD
+  value: "interface=enp0s3"
+```
+
+​	**2. Edit yaml of calico**
+
+​		Check If FELIX_IPV6SUPPORT = false, disable IPv6 on your machine.
+
+​	**3. Edit yaml of calico**
+
+​		Re-apply calico yaml.
+
+```shell
+kubectl delete daemonset/calico-node -n kube-system
+kubectl apply -f calico.yaml
+```
+
