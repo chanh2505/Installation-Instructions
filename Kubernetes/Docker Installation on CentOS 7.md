@@ -21,7 +21,7 @@ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/dock
 #### Install docker
 
 ```shell
-sudo yum install docker
+sudo yum install docker19.03
 ```
 
 #### Start docker service
