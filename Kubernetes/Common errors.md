@@ -52,7 +52,7 @@ EOF
 firewall-cmd --permanent --add-port=179/tcp
 systemctl restart firewalld
 
-sudo kubeadm init --apiserver-advertise-address=10.100.33.70 --pod-network-cidr=192.168.0.0/16
+sudo kubeadm init --apiserver-advertise-address=192.168.1.191 --pod-network-cidr=192.168.0.0/16
 ```
 
 ​	**5. Copy file config**

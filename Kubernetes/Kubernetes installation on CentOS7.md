@@ -12,7 +12,7 @@
 
    ​	Installed CentOS7
 
-   ​	Installed Docker
+   ​	Installed Docker version 19.03
 
 ## K8s Installation
 
@@ -49,9 +49,9 @@ cat <<EOF | sudo tee /etc/docker/daemon.json
   "exec-opts": ["native.cgroupdriver=systemd"],
   "log-driver": "json-file",
   "log-opts": {
-    "max-size": "100m"
+    "max-size": "100m",
   },
-  "storage-driver": "overlay2"
+  "storage-driver": "overlay2",
 }
 EOF
 ```
@@ -127,16 +127,26 @@ sudo swapoff -a
 
 ### On master node 
 
-​	Only execute on 1 master node (if you intent to use multiple master nodes)
+​	Only execute on the master node 
 
-#### Configure kubeadm with **Flannel** pod network 
+**Configure Networkmanager to use Calico**
 
 ```shell
-sysctl -w net.ipv4.ip_forward=1
-sudo kubeadm init --apiserver-advertise-address=192.168.1.30 --pod-network-cidr=10.244.0.0/16
+cat >/etc/NetworkManager/conf.d/calico.conf<<EOF
+[keyfile]
+unmanaged-devices=interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico
+EOF
 ```
 
-Notes: We will have 2 join command in result (one for another master, one for worker), save them to use later.
+​	**Init kubeadm with Calico CNI** (need sudo if init is timeout error)
+
+```shell
+firewall-cmd --permanent --add-port=179/tcp
+systemctl restart firewalld
+
+sysctl -w net.ipv4.ip_forward=1
+sudo kubeadm init --apiserver-advertise-address=192.168.1.27 --pod-network-cidr=192.168.0.0/16
+```
 
 #### Copy config for admin
 
@@ -146,10 +156,10 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-#### Setup pod network
+#### Setup pod Calico network
 
 ```shell
-sudo kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+sudo kubectl apply -f https://docs.projectcalico.org/v3.10/manifests/calico.yaml
 ```
 
 #### Verify status ready
